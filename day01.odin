@@ -1,0 +1,31 @@
+package aoc
+
+import "core:strconv"
+import "core:strings"
+
+solve_day_01_st :: proc() -> [2]int
+{
+    if context.user_index == 0
+    {
+        results: [2]int
+        curr := 50
+        it := string(INPUT)
+
+        for line in strings.split_lines_iterator(&it)
+        {
+            sign := line[0] == 'L' ? -1 : 1
+            rot, _ := strconv.parse_int(line[1:])
+            next := curr + sign * rot
+            results[1] += abs(next) / 100 + int(next == 0 || (next < 0 && curr > 0))
+            curr = next %% 100
+            results[0] += int(curr == 0)
+        }
+        return results
+    }
+    else do return [2]int{}
+}
+
+solve_day_01_mt :: proc() -> [2]int
+{
+    return [2]int{}
+}
