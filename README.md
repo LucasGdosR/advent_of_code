@@ -2,7 +2,7 @@
 
 ## Chronology
 
-2024 -> 2023 (up to day 16) -> 2022 (up to day 15) -> 2025
+2024 -> 2023 (up to day 15 ST) -> 2022 (up to day 15) -> 2025 -> 2023 (15 MT -)
 
 ## Theme by year
 
