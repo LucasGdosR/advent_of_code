@@ -3,102 +3,104 @@ package main
 import (
 	"aoc/2023/common"
 	"bufio"
+	"fmt"
 )
 
 type state struct {
-	i, j, dir int
+	i, j, dir int8
 }
 
 const (
-	LENGTH    = 110
-	SENTINEL  = 1
-	SENTINELS = 2 * SENTINEL
-	UP        = iota
+	UP = 1 << iota
 	RIGHT
 	DOWN
 	LEFT
-)
-
-var (
-	grid      [][]byte
-	seen      = map[state]struct{}{}
-	energized = make([][]bool, LENGTH+SENTINELS)
+	LENGTH = 110
 )
 
 func main() {
-	initGrid()
-	start := state{i: SENTINEL, j: 0, dir: RIGHT}
-
-	for i := range energized {
-		energized[i] = make([]bool, LENGTH+SENTINELS)
+	var results common.Results[int, int]
+	grid := initGrid()
+	var energized [LENGTH][LENGTH]int8
+	results.Part1 = solve(state{i: 0, j: -1, dir: RIGHT}, &energized, grid)
+	var maxEnergized int
+	for i := range int8(LENGTH) {
+		maxEnergized = max(maxEnergized,
+			solve(state{i: -1, j: i, dir: DOWN}, &energized, grid),
+			solve(state{i: LENGTH, j: i, dir: UP}, &energized, grid),
+			solve(state{i: i, j: -1, dir: RIGHT}, &energized, grid),
+			solve(state{i: i, j: LENGTH, dir: LEFT}, &energized, grid),
+		)
 	}
+	results.Part2 = maxEnergized
+	fmt.Printf("%v\n", results)
+}
 
-	propagateBeam(start)
+func solve(start state, energized *[LENGTH][LENGTH]int8, grid [][]byte) int {
+	defer func() { *energized = [LENGTH][LENGTH]int8{} }()
+
+	propagateBeam(start, energized, grid)
 
 	var count int
-	for i := SENTINEL; i < LENGTH+SENTINEL; i++ {
-		for j := SENTINEL; j < LENGTH+SENTINEL; j++ {
-			if energized[i][j] {
+	for _, row := range energized {
+		for _, cell := range row {
+			if cell != 0 {
 				count++
 			}
 		}
 	}
-	println(count)
+	return count
 }
 
-func propagateBeam(s state) {
+func propagateBeam(s state, energized *[LENGTH][LENGTH]int8, grid [][]byte) {
 	next := getNextTile(s)
-	if _, ok := seen[next]; ok {
+	if next.i < 0 || next.i == LENGTH || next.j < 0 || next.j == LENGTH {
+		return
+	}
+	if energized[next.i][next.j]&next.dir != 0 {
 		return
 	}
 
-	seen[next] = struct{}{}
-	energized[next.i][next.j] = true
+	energized[next.i][next.j] |= next.dir
 
 	switch grid[next.i][next.j] {
 	case '.':
-		propagateBeam(next)
+		propagateBeam(next, energized, grid)
 	case '\\':
 		switch next.dir {
-		case UP:
-			next.dir = LEFT
-		case RIGHT:
-			next.dir = UP
-		case DOWN:
-			next.dir = RIGHT
-		case LEFT:
-			next.dir = DOWN
+		case UP, LEFT:
+			next.dir ^= UP ^ LEFT
+		case DOWN, RIGHT:
+			next.dir ^= DOWN ^ RIGHT
 		}
-		propagateBeam(next)
+		propagateBeam(next, energized, grid)
 	case '/':
 		switch next.dir {
-		case UP:
-			next.dir = RIGHT
-		case RIGHT:
-			next.dir = UP
-		case DOWN:
-			next.dir = LEFT
-		case LEFT:
-			next.dir = DOWN
+		case UP, RIGHT:
+			next.dir ^= UP ^ RIGHT
+		case DOWN, LEFT:
+			next.dir ^= DOWN ^ LEFT
 		}
-		propagateBeam(next)
+		propagateBeam(next, energized, grid)
 	case '-':
-		if next.dir == LEFT || next.dir == RIGHT {
-			propagateBeam(next)
-		} else {
+		switch next.dir {
+		case LEFT, RIGHT:
+			propagateBeam(next, energized, grid)
+		case UP, DOWN:
 			next.dir = LEFT
-			propagateBeam(next)
+			propagateBeam(next, energized, grid)
 			next.dir = RIGHT
-			propagateBeam(next)
+			propagateBeam(next, energized, grid)
 		}
 	case '|':
-		if next.dir == UP || next.dir == DOWN {
-			propagateBeam(next)
-		} else {
+		switch next.dir {
+		case UP, DOWN:
+			propagateBeam(next, energized, grid)
+		case LEFT, RIGHT:
 			next.dir = UP
-			propagateBeam(next)
+			propagateBeam(next, energized, grid)
 			next.dir = DOWN
-			propagateBeam(next)
+			propagateBeam(next, energized, grid)
 		}
 	}
 }
@@ -118,17 +120,18 @@ func getNextTile(s state) state {
 }
 
 func initGrid() [][]byte {
-	grid = make([][]byte, LENGTH+SENTINELS)
+	grid := make([][]byte, LENGTH)
+	// TODO: replace this for loop with slicing a single fixed array.
 	for i := range grid {
-		grid[i] = make([]byte, LENGTH+SENTINELS)
+		grid[i] = make([]byte, LENGTH)
 	}
 
 	file := common.Open("input")
 	scanner := bufio.NewScanner(file)
 
-	for i := 1; scanner.Scan(); i++ {
+	for i := 0; scanner.Scan(); i++ {
 		line := scanner.Text()
-		copy(grid[i][1:], line)
+		copy(grid[i], line)
 	}
 
 	return grid
