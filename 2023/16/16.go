@@ -3,7 +3,7 @@ package main
 import (
 	"aoc/2023/common"
 	"bufio"
-	"fmt"
+	"runtime"
 )
 
 type state struct {
@@ -19,6 +19,16 @@ const (
 )
 
 func main() {
+	thisProgram := common.Benchmarkee[int, int]{
+		ST_Impl:  findMaxEnergizedST,
+		MT_Impl:  findMaxEnergizedMT,
+		Part1Str: "Energized from [0, -1, RIGHT]",
+		Part2Str: "Energized max",
+	}
+	common.Benchmark(thisProgram, 100)
+}
+
+func findMaxEnergizedST() common.Results[int, int] {
 	var results common.Results[int, int]
 	grid := initGrid()
 	var energized [LENGTH][LENGTH]int8
@@ -33,7 +43,42 @@ func main() {
 		)
 	}
 	results.Part2 = maxEnergized
-	fmt.Printf("%v\n", results)
+	return results
+}
+
+func findMaxEnergizedMT() common.Results[int, int] {
+	var results common.Results[int, int]
+	grid := initGrid()
+	numWorkers := int8(runtime.GOMAXPROCS(0))
+	linesPerWorker := LENGTH / numWorkers
+	partialResults := make(chan int, numWorkers)
+	for i := range numWorkers {
+		go func(i int8) {
+			var energized [LENGTH][LENGTH]int8
+			var maxEnergized int
+			start := i * linesPerWorker
+			end := start + linesPerWorker
+			if i == numWorkers-1 {
+				end = LENGTH
+			}
+			for i := start; i < end; i++ {
+				maxEnergized = max(maxEnergized,
+					solve(state{i: -1, j: i, dir: DOWN}, &energized, grid),
+					solve(state{i: LENGTH, j: i, dir: UP}, &energized, grid),
+					solve(state{i: i, j: -1, dir: RIGHT}, &energized, grid),
+					solve(state{i: i, j: LENGTH, dir: LEFT}, &energized, grid),
+				)
+			}
+			partialResults <- maxEnergized
+		}(i)
+	}
+	var energized [LENGTH][LENGTH]int8
+	results.Part1 = solve(state{i: 0, j: -1, dir: RIGHT}, &energized, grid)
+	for range numWorkers {
+		results.Part2 = max(results.Part2, <-partialResults)
+	}
+	close(partialResults)
+	return results
 }
 
 func solve(start state, energized *[LENGTH][LENGTH]int8, grid [][]byte) int {
