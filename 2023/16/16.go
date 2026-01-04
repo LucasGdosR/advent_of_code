@@ -171,7 +171,8 @@ func initGrid() [][]byte {
 		grid[i] = make([]byte, LENGTH)
 	}
 
-	file := common.Open("input")
+	file, closer := common.Open("input")
+	defer closer()
 	scanner := bufio.NewScanner(file)
 
 	for i := 0; scanner.Scan(); i++ {

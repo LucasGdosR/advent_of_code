@@ -94,8 +94,8 @@ func floodFill(pipes [][]byte, i, j int, tiles []p) ([]p, bool) {
 }
 
 func enhanceLowResPipes() ([][]byte, []string, p) {
-	file := common.Open("input")
-	defer file.Close()
+	file, closer := common.Open("input")
+	defer closer()
 	scanner := bufio.NewScanner(file)
 
 	LRPipes := make([]string, 0, 140)

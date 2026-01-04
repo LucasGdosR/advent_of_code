@@ -23,8 +23,8 @@ func main() {
 }
 
 func solveColoredBallsST() common.Results[int, int] {
-	file := common.Open("input")
-	defer file.Close()
+	file, closer := common.Open("input")
+	defer closer()
 
 	scanner := bufio.NewScanner(file)
 	var idAndPowerSums common.Results[int, int]

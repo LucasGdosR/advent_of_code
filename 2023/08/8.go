@@ -58,7 +58,7 @@ func countStepsToExitMT() common.Results[int, int] {
 			counts <- count / l
 		}()
 	}
-	for i := 0; i < points; i++ {
+	for range points {
 		results.Part2 *= <-counts
 	}
 	close(counts)
@@ -67,8 +67,8 @@ func countStepsToExitMT() common.Results[int, int] {
 }
 
 func parseInput() (string, map[key]string, []string) {
-	file := common.Open("input")
-	defer file.Close()
+	file, closer := common.Open("input")
+	defer closer()
 	scanner := bufio.NewScanner(file)
 	scanner.Scan()
 	LR := scanner.Text()

@@ -72,14 +72,14 @@ func rankHandsGetWinningsMT() common.Results[int, int] {
 	partialSortedHands := make(chan []handAndBid, numWorkers)
 	partialWinnings := make(chan int, numWorkers)
 	var handsAndBids []handAndBid
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		go worker(&wg, taskChan, partialSortedHands, partialWinnings, file, &handsAndBids)
 	}
 
 	bytesPerWorker := int(size)/numWorkers + 1
 	var winnings common.Results[int, int]
 
-	for i := 0; i < numWorkers; i++ {
+	for i := range numWorkers {
 		start := i * bytesPerWorker
 		end := start + bytesPerWorker
 		if i == numWorkers-1 {
@@ -93,7 +93,7 @@ func rankHandsGetWinningsMT() common.Results[int, int] {
 
 	// Part 2
 	cardToScore['J'] = 0
-	for i := 0; i < numWorkers; i++ {
+	for i := range numWorkers {
 		start := i * handsPerWorker
 		end := start + handsPerWorker
 		if i == numWorkers-1 {
@@ -180,18 +180,10 @@ func countSameOfAKindJoker(h []byte) (byte, byte) {
 	var theBig, theSmall byte
 	if startBig > endBig {
 		theBig = startBig + byte(jokers)
-		if endBig > startSmall {
-			theSmall = endBig
-		} else {
-			theSmall = startSmall
-		}
+		theSmall = max(endBig, startSmall)
 	} else {
 		theBig = endBig + byte(jokers)
-		if startBig > endSmall {
-			theSmall = startBig
-		} else {
-			theSmall = endSmall
-		}
+		theSmall = max(startBig, endSmall)
 	}
 
 	return theBig, theSmall
@@ -227,8 +219,8 @@ func countWinnings(HABs []handAndBid) int {
 }
 
 func parseInput() []handAndBid {
-	input := common.Open("input")
-	defer input.Close()
+	input, closer := common.Open("input")
+	defer closer()
 	scanner := bufio.NewScanner(input)
 	handsAndBids := make([]handAndBid, 0, 1000)
 	for scanner.Scan() {
@@ -335,7 +327,7 @@ func mergeSort(partialSortedHands chan []handAndBid, countSameOfAKind func([]byt
 func getWinnings(numWorkers, handsPerWorker int,
 	HABs []handAndBid, partialWinnings chan int,
 	taskChan chan task) int {
-	for i := 0; i < numWorkers; i++ {
+	for i := range numWorkers {
 		start := i * handsPerWorker
 		end := start + handsPerWorker
 		if i == numWorkers-1 {
@@ -344,7 +336,7 @@ func getWinnings(numWorkers, handsPerWorker int,
 		taskChan <- task{tag: TASK_COUNT, start: start, end: end}
 	}
 	var winnings int
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		winnings += <-partialWinnings
 	}
 	return winnings

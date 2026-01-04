@@ -85,13 +85,13 @@ func measureLoadMT() common.Results[int, int] {
 	taskChan := make(chan task, numWorkers)
 	resultsChan := make(chan uint64, numWorkers)
 	linesPerWorker := (P_LEN + numWorkers - 1) / numWorkers
-	for i := int16(0); i < numWorkers; i++ {
+	for range numWorkers {
 		go worker(&wg, taskChan, resultsChan)
 	}
 
 	// Generic broadcasting func
 	broadcastTask := func(tag int16) {
-		for i := int16(0); i < numWorkers; i++ {
+		for i := range numWorkers {
 			start := i * linesPerWorker
 			end := start + linesPerWorker
 			if i == numWorkers {
@@ -106,7 +106,7 @@ func measureLoadMT() common.Results[int, int] {
 	broadcastTask(N)
 	wg.Wait()
 	broadcastTask(CALC_LOAD)
-	for i := int16(0); i < numWorkers; i++ {
+	for range numWorkers {
 		results.Part1 += int(<-resultsChan)
 	}
 	wg.Add(int(numWorkers))
@@ -117,7 +117,7 @@ func measureLoadMT() common.Results[int, int] {
 	wg.Wait()
 	broadcastTask(E)
 	var h uint64
-	for i := int16(0); i < numWorkers; i++ {
+	for range numWorkers {
 		h += uint64(<-resultsChan)
 	}
 	indexCache[h] = 0
@@ -137,7 +137,7 @@ func measureLoadMT() common.Results[int, int] {
 		wg.Wait()
 		broadcastTask(E)
 		var _h uint64
-		for i := int16(0); i < numWorkers; i++ {
+		for range numWorkers {
 			_h += uint64(<-resultsChan)
 		}
 		if j, ok := indexCache[_h]; ok {
@@ -218,7 +218,7 @@ func rollNorth(rollingCache []int16, start, end int16) {
 	for i := start; i < end; i++ {
 		rollingCache[i] = 0
 	}
-	for i := int16(0); i < P_LEN; i++ {
+	for i := range int16(P_LEN) {
 		for j := start; j < end; j++ {
 			switch get(platform, i, j) {
 			case 'O':
@@ -237,7 +237,7 @@ func rollWest(rollingCache []int16, start, end int16) {
 		rollingCache[i] = 0
 	}
 	for i := start; i < end; i++ {
-		for j := int16(0); j < P_LEN; j++ {
+		for j := range int16(P_LEN) {
 			switch get(platform, i, j) {
 			case 'O':
 				set(platform, i, j, '.')
@@ -293,7 +293,7 @@ func rollEast(rollingCache []int16, start, end int16) hash {
 func getLoad(start, end int16) int {
 	var load int
 	for i := start; i < end; i++ {
-		for j := int16(0); j < P_LEN; j++ {
+		for j := range int16(P_LEN) {
 			if get(platform, i, j) == 'O' {
 				load += P_LEN - int(i)
 			}

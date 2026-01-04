@@ -64,7 +64,7 @@ func sumPointsAndCountScratchCardsMT() common.Results[int, int] {
 	partialPoints := make(chan int, numWorkers)
 	matches := make([][]int, numWorkers)
 
-	for i := 0; i < numWorkers; i++ {
+	for i := range numWorkers {
 		start := i * linesPerWoker
 		end := start + linesPerWoker
 		if i == numWorkers-1 {
@@ -95,7 +95,7 @@ func sumPointsAndCountScratchCardsMT() common.Results[int, int] {
 
 func reduceResults(partialPoints chan int, numWorkers int, matches [][]int) common.Results[int, int] {
 	var total common.Results[int, int]
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		total.Part1 += <-partialPoints
 	}
 	close(partialPoints)
@@ -123,7 +123,7 @@ func reduceResults(partialPoints chan int, numWorkers int, matches [][]int) comm
 func makeWinnersSet(winners []byte) map[byte]struct{} {
 	winnerSet := make(map[byte]struct{})
 	var winner byte = 0
-	for i := 0; i < WINNERS_LENGTH; i++ {
+	for i := range WINNERS_LENGTH {
 		n := winners[i]
 		if n == ' ' {
 			winnerSet[winner] = struct{}{}
@@ -138,7 +138,7 @@ func makeWinnersSet(winners []byte) map[byte]struct{} {
 
 func getMatches(set map[byte]struct{}, numbers []byte) byte {
 	var number, matches byte = 0, 0
-	for i := 0; i < NUMBERS_LENGTH; i++ {
+	for i := range NUMBERS_LENGTH {
 		n := numbers[i]
 		if n == ' ' {
 			_, E := set[number]

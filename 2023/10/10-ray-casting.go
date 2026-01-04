@@ -50,7 +50,7 @@ func findCycleAndNestSpotsMT() common.Results[int, int] {
 	linesPerWoker := (GRID_SIDE + numWorkers - 1) / numWorkers
 	partialNestSpots := make(chan int, numWorkers)
 
-	for i := 0; i < numWorkers; i++ {
+	for i := range numWorkers {
 		start := i * linesPerWoker
 		end := start + linesPerWoker
 		if i == numWorkers-1 {
@@ -62,7 +62,7 @@ func findCycleAndNestSpotsMT() common.Results[int, int] {
 	}
 
 	results := common.Results[int, int]{Part1: cycleLength / 2}
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		results.Part2 += <-partialNestSpots
 	}
 	close(partialNestSpots)
@@ -169,8 +169,8 @@ func findStart(pipes [][]byte) p {
 }
 
 func readPipeMaze() [][]byte {
-	file := common.Open("input")
-	defer file.Close()
+	file, closer := common.Open("input")
+	defer closer()
 	scanner := bufio.NewScanner(file)
 	pipes := make([][]byte, 0, GRID_SIDE)
 	for scanner.Scan() {

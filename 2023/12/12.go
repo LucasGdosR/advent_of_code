@@ -17,8 +17,8 @@ func main() {
 }
 
 func countPossibleArragementsST() common.Results[int, int] {
-	conditionRecords := common.Open("input")
-	defer conditionRecords.Close()
+	conditionRecords, closer := common.Open("input")
+	defer closer()
 
 	memo := make(map[string]int, 260417)
 	var results common.Results[int, int]
@@ -96,16 +96,16 @@ func possibleArrangements(dnd, nums string, memo map[string]int) int {
 
 func pound(dnd, nums string, memo map[string]int) int {
 	var num int
-	i := strings.IndexByte(nums, ',')
-	if i == -1 {
+	before, after, ok := strings.Cut(nums, ",")
+	if !ok {
 		num = common.Atoi(nums)
 	} else {
-		num = common.Atoi(nums[:i])
+		num = common.Atoi(before)
 	}
 	if num > len(dnd) || strings.Contains(dnd[:num], ".") {
 		return 0
 	} else if num == len(dnd) {
-		if i == -1 {
+		if !ok {
 			return 1
 		} else {
 			return 0
@@ -113,10 +113,10 @@ func pound(dnd, nums string, memo map[string]int) int {
 	} else if dnd[num] == '#' {
 		return 0
 	} else {
-		if i == -1 {
+		if !ok {
 			return possibleArrangements(dnd[num+1:], "", memo)
 		} else {
-			return possibleArrangements(dnd[num+1:], nums[i+1:], memo)
+			return possibleArrangements(dnd[num+1:], after, memo)
 		}
 	}
 }
@@ -124,7 +124,7 @@ func pound(dnd, nums string, memo map[string]int) int {
 func unfold(dnd, nums string) (string, string) {
 	unfoldedS := make([]string, 0, 5)
 	unfoldedNums := make([]string, 0, 5)
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		unfoldedS = append(unfoldedS, dnd)
 		unfoldedNums = append(unfoldedNums, nums)
 	}

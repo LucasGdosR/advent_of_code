@@ -60,7 +60,7 @@ func measureUniverseDistancesMT() common.Results[int, int] {
 		emptyCols[i] = 1
 	}
 
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		go worker(&wg,
 			taskChan,
 			file,
@@ -75,7 +75,7 @@ func measureUniverseDistancesMT() common.Results[int, int] {
 
 	// Read image
 	linesPerWorker := (UNIVERSE_LENGTH + numWorkers - 1) / numWorkers
-	for i := 0; i < numWorkers; i++ {
+	for i := range numWorkers {
 		start := i * linesPerWorker
 		end := start + linesPerWorker
 		if i == numWorkers-1 {
@@ -88,7 +88,7 @@ func measureUniverseDistancesMT() common.Results[int, int] {
 	galaxies = make([]p, 0, GALAXY_COUNT)
 	gp1 = make([]p, GALAXY_COUNT)
 	gp2 = make([]p, GALAXY_COUNT)
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		galaxies = append(galaxies, <-galaxiesChan...)
 	}
 	close(galaxiesChan)
@@ -104,7 +104,7 @@ func measureUniverseDistancesMT() common.Results[int, int] {
 	// Expand universe
 	galaxiesPerWorker := (len(galaxies) + numWorkers - 1) / numWorkers
 	wg.Add(numWorkers)
-	for i := 0; i < numWorkers; i++ {
+	for i := range numWorkers {
 		start := i * galaxiesPerWorker
 		end := start + galaxiesPerWorker
 		if i == numWorkers-1 {
@@ -130,7 +130,7 @@ func measureUniverseDistancesMT() common.Results[int, int] {
 	close(taskChan)
 
 	var results common.Results[int, int]
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		r := <-distancesChan
 		results.Part1 += r.Part1
 		results.Part2 += r.Part2
@@ -153,7 +153,7 @@ func worker(wg *sync.WaitGroup,
 		case TASK_READ:
 			partialGalaxies := make([]p, 0, GALAXY_COUNT/2)
 			for i := t.start; i < t.end; i++ {
-				for j := 0; j < UNIVERSE_LENGTH; j++ {
+				for j := range UNIVERSE_LENGTH {
 					if universe[(UNIVERSE_LENGTH+LINE_BREAK)*i+j] == '#' {
 						partialGalaxies = append(partialGalaxies, p{i: i, j: j})
 						emptyRows[i] = 0
@@ -186,7 +186,7 @@ func readImageST() ([]int, []int, []p) {
 
 	for emptyRowCount, i := 0, 0; i < UNIVERSE_LENGTH; i++ {
 		emptyRow := true
-		for j := 0; j < UNIVERSE_LENGTH; j++ {
+		for j := range UNIVERSE_LENGTH {
 			if universe[(UNIVERSE_LENGTH+LINE_BREAK)*i+j] == '#' {
 				galaxies = append(galaxies, p{i: i, j: j})
 				emptyRow = false

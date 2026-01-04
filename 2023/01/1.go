@@ -36,8 +36,8 @@ func main() {
 }
 
 func fixDocumentST() common.Results[int, int] {
-	calibrationDocument := common.Open("input")
-	defer calibrationDocument.Close()
+	calibrationDocument, closer := common.Open("input")
+	defer closer()
 
 	scanner := bufio.NewScanner(calibrationDocument)
 	var calibrationSums common.Results[int, int]
@@ -123,7 +123,7 @@ func findLastNumber(s string, buf []byte) byte {
 func reverse(s string, buf []byte) string {
 	size := len(s)
 	buf = buf[:size]
-	for i := 0; i < size; i++ {
+	for i := range size {
 		buf[size-1-i] = s[i]
 	}
 	return string(buf)

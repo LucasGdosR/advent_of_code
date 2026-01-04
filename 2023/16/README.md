@@ -1,4 +1,3 @@
-
 **How to apply concurrency to this problem**
 
 Part 1 could spawn a thread when it hits a bifurcating mirror. Every time there's a branch, it's an opportunity to solve the problem in parallel. I did not do this, as the actual workload lies in Part 2, which is a lot friendlier to multithreading.

@@ -195,7 +195,8 @@ func (h *minHeap) Pop() any {
 func makeGrid() [][side]byte {
 	grid := make([][side]byte, side)
 
-	file := common.Open("input")
+	file, closer := common.Open("input")
+	defer closer()
 	scanner := bufio.NewScanner(file)
 
 	for i := 0; scanner.Scan(); i++ {

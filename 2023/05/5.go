@@ -28,15 +28,15 @@ func main() {
 }
 
 func mapSeedsAndIntervalsST() common.Results[int, int] {
-	almanac := common.Open("input")
-	defer almanac.Close()
+	almanac, closer := common.Open("input")
+	defer closer()
 
 	scanner := bufio.NewScanner(almanac)
 
 	individualSeeds, seedRanges := makeSeeds(scanner)
 
 	const seed2Soil2Fertilizer2Water2Light2Temperature2Humidity2Location = 7
-	for i := 0; i < seed2Soil2Fertilizer2Water2Light2Temperature2Humidity2Location; i++ {
+	for range seed2Soil2Fertilizer2Water2Light2Temperature2Humidity2Location {
 		tree := makeIntervalTree(scanner)
 		individualSeeds = tree.Map(individualSeeds)
 		seedRanges = tree.Map(seedRanges)
@@ -56,8 +56,8 @@ func mapSeedsAndIntervalsST() common.Results[int, int] {
 }
 
 func mapSeedsAndIntervalsMT() common.Results[int, int] {
-	almanac := common.Open("input")
-	defer almanac.Close()
+	almanac, closer := common.Open("input")
+	defer closer()
 
 	scanner := bufio.NewScanner(almanac)
 
@@ -67,7 +67,7 @@ func mapSeedsAndIntervalsMT() common.Results[int, int] {
 	trees := make(chan *intervalTree, seed2Soil2Fertilizer2Water2Light2Temperature2Humidity2Location)
 	results := make(chan common.Results[int, int])
 	go func() {
-		for i := 0; i < seed2Soil2Fertilizer2Water2Light2Temperature2Humidity2Location; i++ {
+		for range seed2Soil2Fertilizer2Water2Light2Temperature2Humidity2Location {
 			tree := <-trees
 			individualSeeds = tree.Map(individualSeeds)
 			seedRanges = tree.Map(seedRanges)
@@ -87,7 +87,7 @@ func mapSeedsAndIntervalsMT() common.Results[int, int] {
 		close(results)
 	}()
 
-	for i := 0; i < seed2Soil2Fertilizer2Water2Light2Temperature2Humidity2Location; i++ {
+	for range seed2Soil2Fertilizer2Water2Light2Temperature2Humidity2Location {
 		trees <- makeIntervalTree(scanner)
 	}
 	close(trees)

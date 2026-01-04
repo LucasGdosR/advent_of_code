@@ -37,7 +37,7 @@ func Benchmark[T1, T2 any](benchmarkee Benchmarkee[T1, T2], runs int) {
 	multiT := benchmark{min: math.MaxUint64, avg: 0, max: 0}
 
 	runsDivider := uint64(runs)
-	for i := 0; i < runs; i++ {
+	for range runs {
 		timeST := benchmarkSingleThreaded(benchmarkee)
 		singleT.min = min(singleT.min, timeST)
 		singleT.avg += timeST / runsDivider
@@ -81,18 +81,18 @@ func benchmarkMultiThreaded[T1, T2 any](benchmarkee Benchmarkee[T1, T2]) uint64 
 	return end - start
 }
 
-func Open(filepath string) *os.File {
+func Open(filepath string) (*os.File, func() error) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error opening file: %v\n", err)
 		os.Exit(1)
 	}
-	return file
+	return file, file.Close
 }
 
 func Mmap(filepath string) *MappedFile {
-	file := Open(filepath)
-	defer file.Close()
+	file, closer := Open(filepath)
+	defer closer()
 
 	fi, err := file.Stat()
 	if err != nil {
@@ -121,7 +121,7 @@ func SolveCommonCaseMmapLinesInt(processMemRange func([]byte, int64, int64) Resu
 	MmapBacktrackingLinesSolution(mappedFile, partialResults, processMemRange, numWorkers)
 
 	var total Results[int, int]
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		r := <-partialResults
 		total.Part1 += r.Part1
 		total.Part2 += r.Part2
@@ -141,7 +141,7 @@ func MmapBacktrackingLinesSolution[T1, T2 any](
 	size := mappedFile.Size
 	bytesPerWorker := size / int64(numWorkers)
 
-	for i := 0; i < numWorkers; i++ {
+	for i := range numWorkers {
 		start := int64(i) * bytesPerWorker
 		end := start + bytesPerWorker
 		if i == numWorkers-1 {

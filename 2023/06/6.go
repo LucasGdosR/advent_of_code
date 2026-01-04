@@ -24,9 +24,9 @@ type race struct {
 }
 
 func main() {
-	input := common.Open("input")
+	input, closer := common.Open("input")
 	races, theRace := parseTimeAndDist(bufio.NewScanner(input))
-	input.Close()
+	closer()
 
 	racesMargin := 1
 	for _, race := range races {

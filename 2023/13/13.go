@@ -19,8 +19,8 @@ func main() {
 }
 
 func findAllMirrorsST() common.Results[int, int] {
-	file := common.Open("input")
-	defer file.Close()
+	file, closer := common.Open("input")
+	defer closer()
 	scanner := bufio.NewScanner(file)
 
 	var results common.Results[int, int]
@@ -57,7 +57,7 @@ func findAllMirrorsMT() common.Results[int, int] {
 	numWorkers := runtime.GOMAXPROCS(0)
 	bytesPerWorker := (int(size) + numWorkers) / numWorkers
 	partialResults := make(chan common.Results[int, int], numWorkers)
-	for i := 0; i < numWorkers; i++ {
+	for i := range numWorkers {
 		start := i * bytesPerWorker
 		end := start + bytesPerWorker
 		if i == numWorkers-1 {
@@ -79,7 +79,7 @@ func findAllMirrorsMT() common.Results[int, int] {
 		}(start, end)
 	}
 	var results common.Results[int, int]
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		r := <-partialResults
 		results.Part1 += r.Part1
 		results.Part2 += r.Part2

@@ -52,7 +52,7 @@ func findPartsAndGearRatiosMT() common.Results[int, int] {
 	partialResults := make(chan common.Results[int, int], numWorkers)
 	linesPerWorker := GRID_SIZE / numWorkers
 
-	for i := 0; i < numWorkers; i++ {
+	for i := range numWorkers {
 		start := i*linesPerWorker + SENTINEL
 		end := start + linesPerWorker
 		if i == numWorkers-1 {
@@ -61,7 +61,7 @@ func findPartsAndGearRatiosMT() common.Results[int, int] {
 		go workerJob(start, end, partialResults, schematic)
 	}
 	var total common.Results[int, int]
-	for i := 0; i < numWorkers; i++ {
+	for range numWorkers {
 		r := <-partialResults
 		total.Part1 += r.Part1
 		total.Part2 += r.Part2
@@ -90,8 +90,8 @@ func workerJob(start, end int, partialResults chan common.Results[int, int], sch
 }
 
 func readSchematic() [][]byte {
-	schematic := common.Open("input")
-	defer schematic.Close()
+	schematic, closer := common.Open("input")
+	defer closer()
 
 	matrix := make([][]byte, GRID_PLUS_SENTINELS)
 	for i := range matrix {
@@ -151,7 +151,7 @@ func readRight(m [][]byte, i int, j int) (int, int) {
 
 func sumParts(parts []int, count int) int {
 	sum := 0
-	for i := 0; i < count; i++ {
+	for i := range count {
 		sum += parts[i]
 	}
 	return sum
