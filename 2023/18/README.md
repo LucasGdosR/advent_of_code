@@ -1,0 +1,1 @@
+No concurrency here. Vertices must be processed sequentially, because we only get the delta of their coordinates in every line. We could solve part 1 and part 2 in parallel, but they require reading the same line of input and doing simple computations, so we might as well process them all with the parsing thread.
