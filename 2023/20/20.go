@@ -30,7 +30,7 @@ type signal struct {
 func main() {
 	modules := makeModules()
 	rxWriters := findRXWriters(modules)
-	q := MakeDeque[signal](16)
+	q := common.MakeDeque[signal](16)
 	var results common.Results[int, int]
 	var high int
 	// Add 1000 button presses and broadcasts.
