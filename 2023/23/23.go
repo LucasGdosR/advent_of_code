@@ -4,7 +4,6 @@ import (
 	"aoc/2023/common"
 	"bufio"
 	"maps"
-	"runtime"
 	"slices"
 	"sync"
 )
