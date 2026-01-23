@@ -2,7 +2,7 @@
 
 ## Chronology
 
-2024 -> 2023 (up to day 15 ST) -> 2022 (up to day 15) -> 2025 -> 2023 (rest)
+2024 -> 2023 (up to day 15 ST) -> 2022 (up to day 15) -> 2025 -> 2023 (rest) -> 2021 (base layer and day 1)
 
 ## Theme by year
 
@@ -13,6 +13,8 @@
 ***2023:*** multithreading in Go.
 
 ***2022:*** visualizations in Odin with Raylib.
+
+***2021:*** extensive use of `go test`, optimization (Go 1.26 introduces SIMD for AMD64) and making every solution available through an HTTP server.
 
 ## TODO
 
@@ -27,3 +29,4 @@
 - [X] 2023
 - [X] 2024
 - [X] 2025
+
