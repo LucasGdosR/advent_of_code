@@ -2,7 +2,7 @@
 
 ## Chronology
 
-2024 -> 2023 (up to day 15 ST) -> 2022 (up to day 15) -> 2025 -> 2023 (rest) -> 2021 (base layer and day 1)
+2024 -> 2023 (up to day 15 ST) -> 2022 (up to day 15) -> 2025 -> 2023 (rest) -> 2021 (up to day 2)
 
 ## Theme by year
 

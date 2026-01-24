@@ -12,6 +12,7 @@ import (
 	"time"
 
 	_ "aoc/day01"
+	_ "aoc/day02"
 	"aoc/internal/registry"
 )
 
@@ -32,7 +33,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /solve/{day}/{part}", func(w http.ResponseWriter, r *http.Request) {
-		solver, day, err := getSolver(w, r)
+		solver, day, err := getSolver(r)
 		if err != nil {
 			var he *httpError
 			if errors.As(err, &he) {
@@ -55,7 +56,7 @@ func main() {
 	})
 
 	mux.HandleFunc("POST /solve/{day}/{part}", func(w http.ResponseWriter, r *http.Request) {
-		solver, _, err := getSolver(w, r)
+		solver, _, err := getSolver(r)
 		if err != nil {
 			var he *httpError
 			if errors.As(err, &he) {
@@ -96,7 +97,7 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func getSolver(w http.ResponseWriter, r *http.Request) (registry.Solver, int, error) {
+func getSolver(r *http.Request) (registry.Solver, int, error) {
 	var errs []error
 	day, err := strconv.Atoi(r.PathValue("day"))
 	if err != nil {

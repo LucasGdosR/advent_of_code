@@ -10,8 +10,7 @@ func Register(day, part int, s Solver) {
 
 // Get returns nil for non-existent solutions.
 func Get(day, part int) Solver {
-	i := inputToIndex(day, part)
-	return r[i]
+	return r[inputToIndex(day, part)]
 }
 
 func inputToIndex(day, part int) int {
