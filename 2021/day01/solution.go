@@ -15,13 +15,14 @@ func Part1(input []byte) int {
 	var curr, result int
 	prev := math.MaxInt
 	for _, b := range input {
-		if b == '\n' {
+		if b != '\n' {
+			curr = curr<<8 + int(b)
+		} else {
 			if curr > prev {
 				result++
 			}
 			prev = curr
-		} else {
-			curr = curr*10 + int(b-'0')
+			curr = 0
 		}
 	}
 	if curr > prev {
@@ -34,18 +35,19 @@ func Part2(input []byte) int {
 	prev := [3]int{math.MaxInt, math.MaxInt, math.MaxInt}
 	var i, curr, result int
 	for _, b := range input {
-		if b == '\n' {
+		if b != '\n' {
+			curr = curr<<8 + int(b)
+		} else {
 			if curr > prev[i] {
 				result++
 			}
 			prev[i] = curr
+			curr = 0
 			i++
 			// This is faster than %.
 			if i == 3 {
 				i = 0
 			}
-		} else {
-			curr = curr*10 + int(b-'0')
 		}
 	}
 	if curr > prev[i] {

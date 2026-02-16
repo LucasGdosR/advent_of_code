@@ -11,14 +11,12 @@ var (
 )
 
 func BenchmarkPart1(b *testing.B) {
-	b.ReportAllocs()
 	for b.Loop() {
 		blackhole = Part1(realInput)
 	}
 }
 
 func BenchmarkPart2(b *testing.B) {
-	b.ReportAllocs()
 	for b.Loop() {
 		blackhole = Part2(realInput)
 	}
