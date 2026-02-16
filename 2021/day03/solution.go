@@ -21,9 +21,35 @@ func part1(input []byte) (int, int) {
 	bitLen := bytes.IndexByte(input, '\n')
 	lineLen := bitLen + 1
 	counts := make([]int, bitLen)
-	for i = 0; i < len(input); i += lineLen {
-		for j := range bitLen {
-			counts[j] += int(input[i+j])
+	if bitLen == 12 {
+		for i = 0; i < len(input); i += lineLen {
+			counts[0] += int(input[i])
+			counts[1] += int(input[i+1])
+			counts[2] += int(input[i+2])
+			counts[3] += int(input[i+3])
+			counts[4] += int(input[i+4])
+			counts[5] += int(input[i+5])
+			counts[6] += int(input[i+6])
+			counts[7] += int(input[i+7])
+			counts[8] += int(input[i+8])
+			counts[9] += int(input[i+9])
+			counts[10] += int(input[i+10])
+			counts[11] += int(input[i+11])
+		}
+	} else if bitLen == 5 {
+		for i = 0; i < len(input); i += lineLen {
+			counts[0] += int(input[i])
+			counts[1] += int(input[i+1])
+			counts[2] += int(input[i+2])
+			counts[3] += int(input[i+3])
+			counts[4] += int(input[i+4])
+		}
+	} else {
+		// fallback
+		for i = 0; i < len(input); i += lineLen {
+			for j := range bitLen {
+				counts[j] += int(input[i+j])
+			}
 		}
 	}
 
@@ -64,6 +90,7 @@ func part2(input []byte) (int, int) {
 	for j := 1; len(O2) != 1; j++ {
 		majority := countMajority(input, j, O2)
 		var write int
+		// This loop could be unrolled.
 		for _, i := range O2 {
 			if input[i+j] == majority {
 				O2[write] = i
@@ -76,6 +103,7 @@ func part2(input []byte) (int, int) {
 	for j := 1; len(CO2) != 1; j++ {
 		majority := countMajority(input, j, CO2)
 		var write int
+		// This loop could be unrolled.
 		for _, i := range CO2 {
 			if input[i+j] != majority {
 				CO2[write] = i
