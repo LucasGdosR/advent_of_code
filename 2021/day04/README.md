@@ -1,11 +1,11 @@
 # Benchmark
 
 Part 1:
-- 20546 ns/op
+- 19192 ns/op
 - 35456 B/op
 
 Part 2:
-- 25698 ns/op
+- 24625 ns/op
 - 35456 B/op
 
 # Optimizations
