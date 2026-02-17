@@ -9,11 +9,6 @@ func init() {
 	registry.Register(4, 2, Part2)
 }
 
-func Part1(input []byte) int {
-	unmarked, last := part1(input)
-	return unmarked * last
-}
-
 const (
 	rows                         = 5
 	cols                         = 5
@@ -27,11 +22,30 @@ const (
 	numberToBoardShift           = 5 // MSB(boardPatternLen) + 1
 	cache                        = 1
 	cacheIdx                     = boardSize + rows + cols
+	boardsSize                   = boardSize + rows + cols + cache
 )
 
-func part1(input []byte) (int, int) {
-	numberToBoard, boards := parseBoards(input)
+func Part1(input []byte) int {
+	numberToBoard := make([][]int, maxRandom)
+	boardBackingSlice := make([]int, len(numberToBoard)*35)
+	for i, j := 0, 0; i < len(numberToBoard); i, j = i+1, j+35 {
+		numberToBoard[i] = boardBackingSlice[j : j : j+35]
+	}
+	boards := make([][boardsSize]byte, maxBoards)
+
+	unmarked, last := part1(input, numberToBoard, &boards)
+	return unmarked * last
+}
+
+func part1(input []byte, numberToBoard [][]int, boardsPtr *[][boardsSize]byte) (int, int) {
+	for i := range numberToBoard {
+		numberToBoard[i] = numberToBoard[i][:0]
+	}
+	clear(*boardsPtr)
+
+	parseBoards(input, numberToBoard, boardsPtr)
 	var marked [2]uint64
+	boards := *boardsPtr
 	for i, n := 0, byte(0); ; i++ {
 		if input[i] == ',' {
 			marked[(n&64)>>6] |= 1 << (n & 63)
@@ -49,12 +63,25 @@ func part1(input []byte) (int, int) {
 }
 
 func Part2(input []byte) int {
-	unmarked, last := part2(input)
+	numberToBoard := make([][]int, maxRandom)
+	boardBackingSlice := make([]int, len(numberToBoard)*35)
+	for i, j := 0, 0; i < len(numberToBoard); i, j = i+1, j+35 {
+		numberToBoard[i] = boardBackingSlice[j : j : j+35]
+	}
+	boards := make([][boardsSize]byte, maxBoards)
+
+	unmarked, last := part2(input, numberToBoard, &boards)
 	return unmarked * last
 }
 
-func part2(input []byte) (int, int) {
-	numberToBoard, boards := parseBoards(input)
+func part2(input []byte, numberToBoard [][]int, boardsPtr *[][boardsSize]byte) (int, int) {
+	for i := range numberToBoard {
+		numberToBoard[i] = numberToBoard[i][:0]
+	}
+	clear(*boardsPtr)
+
+	parseBoards(input, numberToBoard, boardsPtr)
+	boards := *boardsPtr
 	var marked [2]uint64
 	var boardsToGo int
 	if input[exampleBoardPatternLineBreak] == '\n' {
@@ -85,23 +112,8 @@ func part2(input []byte) (int, int) {
 	}
 }
 
-func parseBoards(input []byte) ([][]int, [][boardSize + rows + cols + cache]byte) {
-	/* Data structures:
-	 *
-	 * Slice holding a slice for every possible random number.
-	 * The inner slices hold the boards that have the random number and the index
-	 * where the random number is present.
-	 *
-	 * Slice holding every board. Each board has 25 numbers. Each number is held
-	 * in the 7 LSB, and the MSB is a flag marking it as visited.
-	 */
-	numberToBoard := make([][]int, maxRandom)
-	boardBackingSlice := make([]int, len(numberToBoard)*35)
-	for i, j := 0, 0; i < len(numberToBoard); i, j = i+1, j+35 {
-		numberToBoard[i] = boardBackingSlice[j : j : j+35]
-	}
-	boards := make([][boardSize + rows + cols + cache]byte, maxBoards)
-
+func parseBoards(input []byte, numberToBoard [][]int, boardsPtr *[][boardsSize]byte) {
+	boards := *boardsPtr
 	// Exploit structured input.
 	var boardPatternStart int
 	if input[exampleBoardPatternLineBreak] == '\n' {
@@ -126,8 +138,6 @@ func parseBoards(input []byte) ([][]int, [][boardSize + rows + cols + cache]byte
 			boards[bi][bii] = n
 		}
 	}
-
-	return numberToBoard, boards
 }
 
 func markAndCheckBingo(b []byte, i int) bool {
